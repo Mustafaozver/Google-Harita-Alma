@@ -1,0 +1,124 @@
+<!DOCTYPE HTML>
+<!-- Ultrasonar A.Ã…Â NodeJS PC HTML ArayÃƒÂ¼zÃƒÂ¼ -->
+<html lang="tr-TR" dir="ltr" xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Type" content="text/html; charset=windows-1254" />
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-9" />
+  <meta http-equiv="Content-Type" content="text/html; charset=x-mac-turkish" />
+  <meta http-equiv="Access-Control-Allow-Origin" content="*">
+  <header name = "Access-Control-Allow-Origin" value = "*" />
+  <meta name="generator" content="ATA 2" />
+  <title>GPS Harita Kontrol Paneli</title>
+  <script>
+  var hex_ = "0123456789ABCDEF";
+  function hexcev(oNum) {
+   oNum = Math.floor(oNum);
+   if (oNum > 255) return "FF";
+   else if (oNum < 0) return "00";
+   var onum = oNum%16;
+   oNum = (oNum-onum)/16;
+   return(""+hex_[oNum]+""+hex_[onum]);
+  }
+  
+  window.ATA = {};
+  ATA.Baslat = function() {
+   ATA.Tuval_ = document.all.tuval;
+   ATA.gco = ATA.Tuval_.getContext("2d");
+  };
+  
+  ATA.Cizgi = function(K0,K1,Kalinlik,Renk) {
+   ATA.gco.beginPath();
+   ATA.gco.lineTo(K0[0],K0[1]);
+   ATA.gco.lineTo(K1[0],K1[1]);
+   ATA.gco.lineWidth = Kalinlik;
+   ATA.gco.strokeStyle = "#" + hexcev(Renk[0]) + hexcev(Renk[1]) + hexcev(Renk[2]) + hexcev(Renk[3]*255);
+   ATA.gco.stroke();
+  };
+  ATA._Resim = [];
+  ATA.ResimBas = function(Url,K) {
+   var ind = ATA._Resim.length;
+   ATA._Resim.push({});
+   ATA._Resim[ind].K = K;
+   ATA._Resim[ind].img = new Image();
+   ATA._Resim[ind].img.src = Url;
+   eval("ATA._Resim["+ind+"].img.onload = function() {ATA.gco.drawImage(ATA._Resim["+ind+"].img, ATA._Resim["+ind+"].K[0], ATA._Resim["+ind+"].K[1]);};");
+  };
+  ATA.HaritaBas = function(Lat,Lng,Z,K) {
+   var AppID = "AIzaSyBu-916DdpKAjTmJNIgngS6HL_kDIKU0aU";
+   var maptype = "hybrid"; // hybrid,roadmap
+   ATA.ResimBas("https://maps.googleapis.com/maps/api/staticmap?center=" + Lat + "," + Lng + "&zoom="+Z+"&maptype="+ maptype +"&size=600x600&key=" + AppID,K);
+  };
+  var lat_o = [0.0001012,24];
+  var lng_o = [0.0001010,19];
+  var Konum_0 = [0,0];
+  ATA.Harita_Bas = function(Lat,Lng,K) { // harita oluştur
+   var Konum = [0,0];
+   Konum_0[0] = Lat;
+   Konum_0[1] = Lng;
+   var den = 20;
+   for (var i=0;i<61;i+=den) { // 1024/lat_o[1]
+    for (var j=0;j<61;j+=den) {
+	 var Lat_ = Lat - lat_o[0]*j + 0.001432; // (-1)*
+	 var Lng_ = Lng + lng_o[0]*i - 0.001822;
+	 var K_ = K.slice();
+	 K_[0] += Konum[0] + i*lng_o[1];
+	 K_[1] += Konum[1] + j*lat_o[1];
+	 var text = "ATA.HaritaBas("+Lat_+","+Lng_+",18,["+K_+"]);";
+	 console.log(text);
+	 eval(text);
+	}
+   }
+  };
+  ATA.Isaretle = function(K) {
+   var k = 3.5;
+   var renk = [255,255,255,0.75];
+   K[0] = -(K[0] - Konum_0[0]); //   K=38.70018448864828, 35.49155299218749
+   K[1] = (K[1] - Konum_0[1]); //   L=38.700808488648285,35.491332992187495
+   K[0] /= lat_o[0]/lat_o[1];
+   K[1] /= lng_o[0]/lng_o[1];
+   K[0] += 640;
+   K[1] += 640;
+   if (false) {
+    var b_ = 5;
+    ATA.Cizgi([K[1]-k*b_,K[0]-k*b_],[K[1]+k*b_,K[0]+k*b_],k,renk); // �arp�
+    ATA.Cizgi([K[1]-k*b_,K[0]+k*b_],[K[1]+k*b_,K[0]-k*b_],k,renk);
+   }
+   
+   if (true) {
+    var b_ = 7;
+    ATA.Cizgi([K[1]+k*b_,K[0]],[K[1]-k*b_,K[0]],k,renk); // art�
+    ATA.Cizgi([K[1],K[0]+k*b_],[K[1],K[0]-k*b_],k,renk);
+   }
+   
+   if (true) {
+    var b_ = 4;
+    ATA.Cizgi([K[1]-k*b_,K[0]-k*b_],[K[1]+k*b_,K[0]-k*b_],k,renk); // kare
+    ATA.Cizgi([K[1]+k*b_,K[0]-k*b_],[K[1]+k*b_,K[0]+k*b_],k,renk);
+    ATA.Cizgi([K[1]+k*b_,K[0]+k*b_],[K[1]-k*b_,K[0]+k*b_],k,renk);
+    ATA.Cizgi([K[1]-k*b_,K[0]+k*b_],[K[1]-k*b_,K[0]-k*b_],k,renk);
+   }
+  };
+  ATA.Harita_Bas_0 = function() { // harita oluştur
+   Konum_0 = [37.0,31.0];
+   ATA.ResimBas("harita.png",[0,0]);
+  };
+  </script>
+  <style>
+  body {
+   margin:0;
+   padding:0;
+  }
+  
+  .tuval {
+   left:0;
+   top:0;
+   position:absolute;
+  }
+</style>
+</head>
+<body><canvas class="tuval" width="1280" height="1280" id="tuval" style="width:1280px;height:1280px;background-color:black;"></canvas>
+<script>setTimeout("ATA.Baslat();",100);</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<div id="map" style="width:100%;height:500px"></div>
+
+<script>
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+var noktalar1 = [[38.7008000,35.00]];
+var noktalar2 = [];
+noktalar1.push([38.700808488648285,35.491332992187495]);
+noktalar1.push([37.68071623636351,31.725542612518893]); // beyşehir
+noktalar1.push([41.00739888067911,28.9739193935701]); // istanbul
+
+noktalar2.push([41.8107493696844,27.951854705097276]);
+noktalar2.push([41.135762399602164,30.149120330097276]);
+noktalar2.push([41.21845405838959,31.379589080097276]);
+noktalar2.push([41.95797581843254,34.170116423847276]);
+noktalar2.push([41.18538992227506,37.136425017597276]);
+noktalar2.push([41.01981873946364,38.894237517597276]);
+noktalar2.push([41.31754621934361,41.091503142597276]);
+noktalar2.push([41.48236551292553,42.651561736347276]);
+noktalar2.push([40.637422088993446,43.640331267597276]);
+noktalar2.push([40.13533387824577,43.596385955097276]);
+noktalar2.push([39.760970491626594,44.66355942916357]);
+noktalar2.push([39.320410552295726,44.04832505416357]);
+noktalar2.push([37.320949016610925,44.70750474166357]);
+noktalar2.push([36.8828363135323,44.24607896041357]);
+noktalar2.push([37.28599330049528,43.25730942916357]);
+noktalar2.push([37.05838540740225,41.58738755416357]);
+noktalar2.push([36.724496244240335,38.95066880416357]);
+noktalar2.push([36.93554354905392,38.29148911666357]);
+noktalar2.push([36.724496244240335,36.73143052291357]);
+noktalar2.push([35.83888752366954,36.35789536666357]);
+noktalar2.push([35.78543203270948,35.94041489791357]);
+noktalar2.push([36.90040943820945,36.11619614791357]);
+noktalar2.push([36.58347487268783,35.47898911666357]);
+noktalar2.push([36.79491002651858,34.73191880416357]);
+noktalar2.push([36.19433649138652,33.89695786666357]);
+noktalar2.push([36.12337499709145,32.71043442916357]);
+noktalar2.push([36.56582904633331,31.98533677291357]);
+noktalar2.push([36.79491002651858,30.57908677291357]);
+noktalar2.push([36.22979314729129,30.38133286666357]);
+noktalar2.push([36.406835263269045,29.12889146041357]);
+noktalar2.push([36.724496244240335,28.16209458541357]);
+noktalar2.push([37.28599330049528,27.41502427291357]);
+noktalar2.push([38.25859322788501,27.04148911666357]);
+noktalar2.push([39.30341012089148,26.84373521041357]);
+noktalar2.push([39.52409339705201,26.00877427291357]);
+noktalar2.push([40.282592631852616,26.36033677291357]);
+noktalar2.push([40.63368106201002,26.75584458541357]);
+noktalar2.push([41.049248723773225,26.27244614791357]);
+noktalar2.push([41.80707486991812,26.49217271041357]);
+noktalar2.push([42.18266728996937,27.17332505416357]);
+
+var harita1_ = [];
+var harita2_ = [];
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+var Ultrasonar = {};
+Ultrasonar.Harita = {};
+Ultrasonar.Harita.Noktalar = [];
+Ultrasonar.Harita.NoktaAt = function(location) {
+ var marker = new google.maps.Marker({
+  position: location,
+  map: Ultrasonar.Harita.map,
+  icon: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"
+ });
+ var infowindow = new google.maps.InfoWindow({
+  content: 'Konum : ' + location.lat() + ',' + location.lng()
+ });
+ infowindow.open(Ultrasonar.Harita.map,marker);
+ google.maps.event.addListener(marker,'click',function() {
+  map.setZoom(9);
+  map.setCenter(marker.getPosition());
+ });
+};
+
+Ultrasonar.Harita.Baslat = function() {
+ for (var i=0;i<noktalar2.length;i++) {
+  harita2_.push(new google.maps.LatLng(noktalar2[i][0],noktalar2[i][1]));
+ }
+  for (var i=0;i<noktalar1.length;i++) {
+  harita1_.push(new google.maps.LatLng(noktalar1[i][0],noktalar1[i][1]));
+ }
+ Ultrasonar.Harita.Merkez = new google.maps.LatLng(38.700808488648285,35.491332992187495);
+ Ultrasonar.Harita.mapCanvas = document.getElementById("map");
+ Ultrasonar.Harita.map = new google.maps.Map(Ultrasonar.Harita.mapCanvas, {
+  center:Ultrasonar.Harita.Merkez,
+  zoom:7,
+  mapTypeId:google.maps.MapTypeId.HYBRID 
+ });
+ google.maps.event.addListener(Ultrasonar.Harita.map, 'click', function(event) {
+  Ultrasonar.Harita.NoktaAt(event.latLng);
+ });
+};
+
+Ultrasonar.Harita.BolgeIsaretle = function(renk,konumlar) {
+ var flightPath = new google.maps.Polyline({
+  path: konumlar,
+  strokeColor: renk,
+  geodesic: true,
+  strokeOpacity: 0.6,
+  strokeWeight: 1.5,
+ });
+ flightPath.setMap(Ultrasonar.Harita.map);
+};
+</script>
+<script>
+var myMap = function() {
+ Ultrasonar.Harita.Baslat();
+ Ultrasonar.Harita.BolgeIsaretle("blue",harita1_);
+ Ultrasonar.Harita.BolgeIsaretle("red",harita2_);
+};
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBu-916DdpKAjTmJNIgngS6HL_kDIKU0aU&callback=myMap"></script>
+<!--
+To use this code on your website, get a free API key from Google.
+Read more at: https://www.w3schools.com/graphics/google_maps_basic.asp
+-->
+<textarea style="font-size:2em;" id="eval">
+var LATLNG = [37.59326796973832,31.845821066020903];
+Ultrasonar.Harita.NoktaAt(Ultrasonar.Harita.Merkez);
+Ultrasonar.Harita.NoktaAt(new google.maps.LatLng(LATLNG[0],LATLNG[1]));
+</textarea><button onclick="eval(document.all.eval.value);">Yap</button>
+</body>
+</html>
